@@ -5,7 +5,8 @@ from jodie.parsers.parsers import (
     EmailParser, 
     NameParser, 
     WebsiteParser, 
-    TitleParser
+    TitleParser,
+    PhoneParser
 )
 
 __all__ = (
@@ -13,5 +14,6 @@ __all__ = (
     "EmailParser", 
     "NameParser", 
     "WebsiteParser", 
-    "TitleParser"
+    "TitleParser",
+    "PhoneParser"
 )

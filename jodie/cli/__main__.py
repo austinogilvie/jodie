@@ -72,7 +72,14 @@ def parse_auto(arguments):
                 detected_fields["job_title"] = title
                 continue
 
-        # 4. Person Name - Often ambiguous without context
+        # 4. Phone Number - Look for phone patterns
+        if not detected_fields["phone"]:
+            phone = jodie.parsers.PhoneParser.parse(arg)
+            if phone:
+                detected_fields["phone"] = phone
+                continue
+
+        # 5. Person Name - Often ambiguous without context
         if not detected_fields["first_name"]:
             first_name, last_name = jodie.parsers.NameParser.parse(arg)
             if first_name or last_name:
@@ -86,10 +93,11 @@ def parse_auto(arguments):
         if (arg == detected_fields["email"] or
             arg in detected_fields["websites"] or
             arg == detected_fields["job_title"] or
+            arg == detected_fields["phone"] or
             arg == f"{detected_fields['first_name']} {detected_fields['last_name']}".strip()):
             continue
 
-        # 5. Company Name - Most ambiguous, use as fallback
+        # 6. Company Name - Most ambiguous, use as fallback
         if not detected_fields["company"]:
             # Check for business-related terms
             if any(term in arg.lower() for term in ["inc", "llc", "ltd", "corp", "co"]):

@@ -152,6 +152,65 @@ class WebsiteParser(BaseParser):
         return urls[0] if urls else None
 
 
+class PhoneParser(BaseParser):
+    @classmethod
+    def parse(cls, text):
+        """
+        Parse a phone number from the given text.
+        Supports various phone number formats:
+        - 10 digits: 5167763192
+        - With country code: +15167763192, 15167763192
+        - With separators: 516-776-3192, 516.776.3192, (516) 776-3192
+        - International formats: +1 516 776 3192
+        
+        Returns the cleaned phone number or None if no valid phone found.
+        """
+        if not isinstance(text, str) or not text.strip():
+            return None
+            
+        # Remove common non-digit characters for analysis
+        digits_only = ''.join(ch for ch in text if ch.isdigit())
+        
+        # Various phone number patterns
+        phone_patterns = [
+            # US phone numbers with various formatting
+            r'\+?1?[-.\s]?\(?([0-9]{3})\)?[-.\s]?([0-9]{3})[-.\s]?([0-9]{4})\b',
+            # 10 digit number
+            r'\b([0-9]{10})\b',
+            # International format with country code
+            r'\+?([0-9]{1,3})[-.\s]?([0-9]{3,4})[-.\s]?([0-9]{3,4})[-.\s]?([0-9]{3,4})\b'
+        ]
+        
+        for pattern in phone_patterns:
+            matches = cls.find_matches(pattern, text)
+            if matches:
+                # For tuple matches, join the groups
+                if isinstance(matches[0], tuple):
+                    # Remove empty groups and join
+                    phone_digits = ''.join(group for group in matches[0] if group)
+                else:
+                    phone_digits = matches[0]
+                
+                # Validate phone number length
+                if len(phone_digits) == 10:
+                    # US phone number without country code
+                    return phone_digits
+                elif len(phone_digits) == 11 and phone_digits.startswith('1'):
+                    # US phone number with country code
+                    return phone_digits[1:]  # Return without country code
+                elif 7 <= len(phone_digits) <= 15:
+                    # International phone number
+                    return phone_digits
+        
+        # Fallback: if we have exactly 10 or 11 digits, treat as phone
+        if len(digits_only) == 10:
+            return digits_only
+        elif len(digits_only) == 11 and digits_only.startswith('1'):
+            return digits_only[1:]
+            
+        return None
+
+
 class NameParser(BaseParser):
     @classmethod
     def parse(cls, text):

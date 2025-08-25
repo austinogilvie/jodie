@@ -37,6 +37,32 @@ def get_label_for_email(email: str) -> str:
         return "home"
 
 
+def get_human_friendly_label(label: str) -> str:
+    """
+    Convert Apple Contacts framework label constants to human-friendly names.
+    
+    Args:
+        label (str): The label constant from Apple Contacts framework
+        
+    Returns:
+        str: A human-friendly label name
+    """
+    # Map Apple constants to friendly names
+    label_map = {
+        CNLabelURLAddressHomePage: "Website",
+        "work": "Work",
+        "home": "Home", 
+        "LinkedIn": "LinkedIn",
+        "GitHub": "GitHub",
+        "Twitter": "Twitter",
+        "Instagram": "Instagram", 
+        "Facebook": "Facebook",
+        "Calendar": "Calendar"
+    }
+    
+    return label_map.get(label, label)
+
+
 def get_label_for_website(url: str, email: Optional[str] = None, company: Optional[str] = None) -> str:
     """
     Determine the appropriate label for a website URL based on its domain, email, and company information.
@@ -181,12 +207,18 @@ class Contact:
             Contact: The saved contact instance
 
         Raises:
-            ValueError: If required fields (first name, last name, email) are missing
+            ValueError: If required fields (first name, last name, and either email or phone) are missing
             Exception: If the save operation fails
         """
-        if not all([self.contact.givenName(), self.contact.familyName(), self.contact.emailAddresses()]):
+        # Check that we have first name, last name, and at least one contact method (email or phone)
+        has_first_name = bool(self.contact.givenName())
+        has_last_name = bool(self.contact.familyName())
+        has_email = bool(self.contact.emailAddresses())
+        has_phone = bool(self.contact.phoneNumbers())
+        
+        if not (has_first_name and has_last_name and (has_email or has_phone)):
             raise ValueError(
-                "Missing required fields. First name, last name, and email are required.")
+                "Missing required fields. First name, last name, and at least one contact method (email or phone) are required.")
 
         store: CNContactStore = CNContactStore.alloc().init()
         request: CNSaveRequest = CNSaveRequest.alloc().init()
@@ -224,7 +256,7 @@ class Contact:
         
         # Websites
         if self.websites:
-            website_str = ", ".join(f"{site.label()}: {site.value()}" for site in self.websites)
+            website_str = ", ".join(f"{get_human_friendly_label(site.label())}: {site.value()}" for site in self.websites)
             fields.append(f"Websites: {website_str}")
         else:
             fields.append("Websites: None")
@@ -234,7 +266,7 @@ class Contact:
     def __repr__(self) -> str:
         websites = self.websites
         if websites:
-            website_repr = f"[{', '.join(f'{site.label()}: {site.value()}' for site in websites)}]"
+            website_repr = f"[{', '.join(f'{get_human_friendly_label(site.label())}: {site.value()}' for site in websites)}]"
         else:
             website_repr = "None"
         return (f"{self.__class__.__name__}(first_name={self.first_name!r}, "
