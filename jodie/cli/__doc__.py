@@ -40,7 +40,7 @@ __description__ = "Jodie lets you add contacts to Contacts.app on macOS from com
 __keywords__    = "macOS Contacts.app Contact management Contacts command line tool CLI"
 __author__      = "austin"
 __email__       = "tips@cia.lol"
-__url__         = "https://github.com/hernamesbarbara/jodie"
+__url__         = "https://github.com/austinogilvie/jodie"
 
 
 __all__ = ['__version__', '__description__', '__url__', '__doc__']

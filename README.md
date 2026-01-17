@@ -12,7 +12,7 @@ clone
 
 ```
 # Clone the repo
-git clone git@github.com:hernamesbarbara/jodie.git
+git clone git@github.com:austinogilvie/jodie.git
 cd jodie/
 pip install .
 ```

@@ -15,7 +15,7 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/hernamesbarbara/jodie"
+Homepage = "https://github.com/austinogilvie/jodie"
 
 [tool.setuptools.packages.find]
 where = ["."]
