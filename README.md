@@ -9,6 +9,12 @@ Named for [Jodie Foster](https://en.wikipedia.org/wiki/Jodie_Foster) for her ste
 ## Installation
 
 ```bash
+pip install jodie
+```
+
+Or install from source:
+
+```bash
 git clone git@github.com:austinogilvie/jodie.git
 cd jodie
 pip install .
