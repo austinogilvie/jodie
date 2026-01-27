@@ -144,3 +144,10 @@ tmp/
 poetry.lock
 pyinstaller/
 TODO.txt
+jodie-call-history.txt
+
+# Test artifacts
+*.vcf
+
+# Git worktrees
+.worktrees/
