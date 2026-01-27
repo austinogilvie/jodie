@@ -163,7 +163,8 @@ def main():
             company = fields.get('company')
             websites = fields.get('websites')
         # Apply explicit overrides from command line
-        note = args.get('--note') or args.get('--notes')
+        # TODO: Notes disabled pending AppleScript refactor (ISS-000012)
+        # note = args.get('--note') or args.get('--notes')
         if args.get('--company'):
             company = args.get('--company')
 
@@ -184,7 +185,8 @@ def main():
             company = fields.get('company')
             websites = fields.get('websites')
         # Apply explicit overrides from command line
-        note = args.get('--note') or args.get('--notes')
+        # TODO: Notes disabled pending AppleScript refactor (ISS-000012)
+        # note = args.get('--note') or args.get('--notes')
         if args.get('--company'):
             company = args.get('--company')
 
@@ -205,7 +207,8 @@ def main():
                 title = fields.get('job_title')
                 company = fields.get('company')
                 websites = fields.get('websites')
-                note = fields.get('note')
+                # TODO: Notes disabled pending AppleScript refactor (ISS-000012)
+                # note = fields.get('note')
 
         elif mode == "positional":
             try:
@@ -218,7 +221,8 @@ def main():
                 sys.exit(1)
             company = args.get('COMPANY')
             title = args.get('TITLE')
-            note = args.get('NOTE')
+            # TODO: Notes disabled pending AppleScript refactor (ISS-000012)
+            # note = args.get('NOTE')
 
         elif mode == "named":
             try:
@@ -252,7 +256,8 @@ def main():
                         websites = [websites]
                     websites.append({'url': linkedin_url, 'label': 'LinkedIn'})
                 # Handle note aliases: --note, --notes
-                note = args.get('--note') or args.get('--notes')
+                # TODO: Notes disabled pending AppleScript refactor (ISS-000012)
+                # note = args.get('--note') or args.get('--notes')
 
             except Exception as e:
                 sys.stderr.write(f"Error processing named arguments: {str(e)}\n")

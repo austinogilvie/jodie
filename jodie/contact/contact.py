@@ -273,10 +273,11 @@ class Contact:
         if not success:
             raise Exception(f"Failed to save contact: {error}")
 
+        # TODO: Notes disabled pending AppleScript refactor (ISS-000012)
         # After successful PyObjC save, apply note via AppleScript if present
-        note_text = self.contact.note()
-        if note_text:
-            self._set_note_via_applescript(note_text)
+        # note_text = self.contact.note()
+        # if note_text:
+        #     self._set_note_via_applescript(note_text)
 
         return self
 
