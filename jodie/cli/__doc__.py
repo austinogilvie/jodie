@@ -2,22 +2,24 @@
 # jodie/cli/__doc__.py
 """jodie - Manage macOS Contacts.app from command line!
 
-Usage: 
-    jodie new [EMAIL NAME COMPANY TITLE NOTE...]
+Usage:
+    jodie new TEXT...
     jodie new [options]
     jodie new --auto TEXT...
+    jodie new --explicit EMAIL NAME [COMPANY] [TITLE] [NOTE...]
     jodie parse [options] TEXT
 
 Arguments:
-    EMAIL                               Email address for the contact you want to create.
-    NAME                                Full name for the contact you want to create.
-    COMPANY                             Company name.
-    TITLE                               Job title.
-    NOTE                                Any text you want to save in the `Note` field in Contacts.app.
-    TEXT                                Text for jodie to try her best to parse semi-intelligently if she can.
+    TEXT                                Text for jodie to parse intelligently (default mode).
+    EMAIL                               Email address (used with --explicit).
+    NAME                                Full name (used with --explicit).
+    COMPANY                             Company name (used with --explicit).
+    TITLE                               Job title (used with --explicit).
+    NOTE                                Note text (used with --explicit).
 
 Options:
-    -A --auto                           Automatically guess fields from provided text.
+    --explicit                          Use strict positional parsing (EMAIL NAME COMPANY TITLE NOTE).
+    -A --auto                           Smart parsing mode (default, kept for backward compatibility).
     -C COMPANY --company=COMPANY        Company name.
     -E EMAIL --email=EMAIL              Email.
     -F FIRST --first=FIRST              First name.

@@ -7,27 +7,30 @@ import jodie
 from jodie.cli.__doc__ import __version__, __description__, __url__, __doc__
 
 COMMANDS = ('new', 'parse',)
-NOT_ARGS = ('--help', '--version', '--auto')
+UTILITY_FLAGS = ('--auto', '--explicit', '--help', '--version')
 
 def detect_argument_mode(args):
     """
-    Determines the mode based on provided arguments:
-    - "auto": if --auto is specified.
-    - "named": if named arguments are provided.
-    - "positional": if positional arguments are used.
+    Mode priority:
+    1. --explicit -> positional (strict order)
+    2. Named flags -> named mode
+    3. TEXT arguments -> auto (default)
     """
-    if args['--auto']:
-        return "auto"
-    if any(args.get(arg) for arg in NOT_ARGS if arg != '--auto'):
+    # --explicit forces positional mode
+    if args.get('--explicit'):
         return "positional"
-    
-    named_options = {}
-    for key in args.keys():
-        if key.startswith('--') and key not in NOT_ARGS:
-            named_options[key] = args[key]
+
+    # Check for named options (excluding utility flags)
+    named_options = {k: v for k, v in args.items()
+                     if k.startswith('--') and k not in UTILITY_FLAGS}
 
     if any(named_options.values()):
-        return "named" 
+        return "named"
+
+    # Default: bare args -> auto-parse
+    if args.get('TEXT'):
+        return "auto"
+
     return "positional"
 
 def parse_auto(arguments):
@@ -200,8 +203,8 @@ def main():
         phone=phone,
         job_title=title,
         company=company,
-        websites=websites
-        # note=note
+        websites=websites,
+        note=note
     )
 
     sys.stdout.write(f'Saving...\n{c}\n')
