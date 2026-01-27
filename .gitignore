@@ -151,3 +151,5 @@ jodie-call-history.txt
 
 # Git worktrees
 .worktrees/
+.wrangler/
+scripts/
