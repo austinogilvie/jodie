@@ -3,11 +3,11 @@
 """jodie - Manage macOS Contacts.app from command line!
 
 Usage:
-    jodie new TEXT... [--dry-run]
+    jodie new TEXT... [options]
     jodie new [options]
-    jodie new --auto TEXT... [--dry-run]
-    jodie new --paste [--dry-run]
-    jodie new --stdin [--dry-run]
+    jodie new --auto TEXT... [options]
+    jodie new --paste [options]
+    jodie new --stdin [options]
     jodie new --explicit EMAIL NAME [COMPANY] [TITLE] [NOTE...]
     jodie parse [options] TEXT
 
