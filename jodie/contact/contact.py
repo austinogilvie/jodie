@@ -2,6 +2,7 @@
 # jodie/contact/contact.py
 from datetime import datetime
 from typing import Optional, Set, List, Any, Union, Dict
+import subprocess
 import objc
 from Contacts import (CNMutableContact, CNContactStore, CNSaveRequest, CNLabeledValue,
                       CNPhoneNumber, CNLabelURLAddressHomePage)
@@ -199,6 +200,49 @@ class Contact:
             "created_date", dateComponents)
         self.contact.setDates_([customDateValue])
 
+    def _set_note_via_applescript(self, note_text: str) -> bool:
+        """Set note field via AppleScript (bypasses entitlement requirement).
+
+        Args:
+            note_text: The note text to set on the contact
+
+        Returns:
+            bool: True if successful, False otherwise
+        """
+        if not note_text:
+            return True
+
+        # Escape for AppleScript string
+        escaped_note = note_text.replace('\\', '\\\\').replace('"', '\\"')
+
+        # Build query to find the contact we just saved
+        first = self.first_name or ""
+        last = self.last_name or ""
+
+        if first and last:
+            query = f'first name is "{first}" and last name is "{last}"'
+        elif first:
+            query = f'first name is "{first}"'
+        elif last:
+            query = f'last name is "{last}"'
+        else:
+            return False  # Can't identify contact without name
+
+        applescript = f'''
+        tell application "Contacts"
+            set p to first person whose {query}
+            set note of p to "{escaped_note}"
+            save
+        end tell
+        '''
+
+        result = subprocess.run(
+            ['osascript', '-e', applescript],
+            capture_output=True,
+            text=True
+        )
+        return result.returncode == 0
+
     def save(self) -> 'Contact':
         """
         Validate required fields and try to save to Contacts.app / Apple Address Book.
@@ -215,7 +259,7 @@ class Contact:
         has_last_name = bool(self.contact.familyName())
         has_email = bool(self.contact.emailAddresses())
         has_phone = bool(self.contact.phoneNumbers())
-        
+
         if not (has_first_name and has_last_name and (has_email or has_phone)):
             raise ValueError(
                 "Missing required fields. First name, last name, and at least one contact method (email or phone) are required.")
@@ -228,6 +272,12 @@ class Contact:
         success, error = store.executeSaveRequest_error_(request, None)
         if not success:
             raise Exception(f"Failed to save contact: {error}")
+
+        # After successful PyObjC save, apply note via AppleScript if present
+        note_text = self.contact.note()
+        if note_text:
+            self._set_note_via_applescript(note_text)
+
         return self
 
     def __str__(self) -> str:

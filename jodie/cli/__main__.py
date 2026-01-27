@@ -7,27 +7,30 @@ import jodie
 from jodie.cli.__doc__ import __version__, __description__, __url__, __doc__
 
 COMMANDS = ('new', 'parse',)
-NOT_ARGS = ('--help', '--version', '--auto')
+UTILITY_FLAGS = ('--auto', '--explicit', '--help', '--version')
 
 def detect_argument_mode(args):
     """
-    Determines the mode based on provided arguments:
-    - "auto": if --auto is specified.
-    - "named": if named arguments are provided.
-    - "positional": if positional arguments are used.
+    Mode priority:
+    1. --explicit -> positional (strict order)
+    2. Named flags -> named mode
+    3. TEXT arguments -> auto (default)
     """
-    if args['--auto']:
-        return "auto"
-    if any(args.get(arg) for arg in NOT_ARGS if arg != '--auto'):
+    # --explicit forces positional mode
+    if args.get('--explicit'):
         return "positional"
-    
-    named_options = {}
-    for key in args.keys():
-        if key.startswith('--') and key not in NOT_ARGS:
-            named_options[key] = args[key]
+
+    # Check for named options (excluding utility flags)
+    named_options = {k: v for k, v in args.items()
+                     if k.startswith('--') and k not in UTILITY_FLAGS}
 
     if any(named_options.values()):
-        return "named" 
+        return "named"
+
+    # Default: bare args -> auto-parse
+    if args.get('TEXT'):
+        return "auto"
+
     return "positional"
 
 def parse_auto(arguments):
@@ -125,6 +128,25 @@ def main():
     first, last, email, phone, title, company, websites, note = (None,) * 8
 
     args = docopt(__doc__, version=__version__)
+
+    # Handle --paste: read from clipboard
+    if args.get('--paste'):
+        from jodie.input import read_clipboard, SignaturePreprocessor
+        text = read_clipboard()
+        preprocessed = SignaturePreprocessor.preprocess(text)
+        args['TEXT'] = preprocessed
+        # Force auto mode
+        args['--auto'] = True
+
+    # Handle --stdin: read from stdin
+    if args.get('--stdin'):
+        from jodie.input import read_stdin, SignaturePreprocessor
+        text = read_stdin()
+        preprocessed = SignaturePreprocessor.preprocess(text)
+        args['TEXT'] = preprocessed
+        # Force auto mode
+        args['--auto'] = True
+
     mode = detect_argument_mode(args)
 
     if mode == "auto":
@@ -157,9 +179,12 @@ def main():
 
     elif mode == "named":
         try:
-            first = args.get('--first')
-            last = args.get('--last')
-            full = args.get('--full-name')
+            # Handle first name aliases: --first, --first-name, --firstname
+            first = args.get('--first') or args.get('--first-name') or args.get('--firstname')
+            # Handle last name aliases: --last, --last-name, --lastname
+            last = args.get('--last') or args.get('--last-name') or args.get('--lastname')
+            # Handle full name aliases: --full-name, --name
+            full = args.get('--full-name') or args.get('--name')
             if full:
                 parts = full.split()
                 if first is None:
@@ -170,15 +195,42 @@ def main():
             phone = args.get('--phone')
             title = args.get('--title')
             company = args.get('--company')
-            websites = args.get('--websites')
+            # Handle websites aliases: --websites, --website
+            websites = args.get('--websites') or args.get('--website')
             if websites and isinstance(websites, str):
                 # Only split if it's a string (from command line)
                 websites = [url.strip() for url in websites.split(',')]
-            note = args.get('--note')
+            # Handle --linkedin specially (adds with LinkedIn label)
+            linkedin_url = args.get('--linkedin')
+            if linkedin_url:
+                if websites is None:
+                    websites = []
+                elif isinstance(websites, str):
+                    websites = [websites]
+                websites.append({'url': linkedin_url, 'label': 'LinkedIn'})
+            # Handle note aliases: --note, --notes
+            note = args.get('--note') or args.get('--notes')
 
         except Exception as e:
             sys.stderr.write(f"Error processing named arguments: {str(e)}\n")
             sys.exit(1)
+
+    # Handle dry-run preview
+    if args.get('--dry-run'):
+        from jodie.cli.preview import format_preview
+        fields = {
+            'first_name': first,
+            'last_name': last,
+            'email': email,
+            'phone': phone,
+            'job_title': title,
+            'company': company,
+            'websites': websites,
+            'note': note
+        }
+        preview = format_preview(fields)
+        sys.stdout.write(preview + "\n")
+        sys.exit(0)
 
     c = jodie.contact.Contact(
         first_name=first,
@@ -187,8 +239,8 @@ def main():
         phone=phone,
         job_title=title,
         company=company,
-        websites=websites
-        # note=note
+        websites=websites,
+        note=note
     )
 
     sys.stdout.write(f'Saving...\n{c}\n')
