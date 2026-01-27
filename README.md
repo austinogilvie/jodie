@@ -4,6 +4,8 @@ A command line tool to quickly save new contacts to Contacts.app on macOS.
 
 Named for [Jodie Foster](https://en.wikipedia.org/wiki/Jodie_Foster) for her stellar performance in [Contact](https://en.wikipedia.org/wiki/Contact_(1997_American_film)).
 
+![Jodie Foster in Contact](https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExemplaHV3NWJocHYwOHNqc2k5Z2o3YnZnZ3RpaXZhaWQyaWRhNnY1eSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/13xLRkHueBopjO/giphy.gif)
+
 ## Installation
 
 ```bash
