@@ -5,6 +5,7 @@ from docopt import docopt
 from nameparser import HumanName
 import jodie
 from jodie.cli.__doc__ import __version__, __description__, __url__, __doc__
+from jodie.constants import WEBMAIL_DOMAINS
 
 COMMANDS = ('new', 'parse',)
 UTILITY_FLAGS = ('--auto', '--explicit', '--help', '--version', '--dry-run', '--paste', '--stdin')
@@ -130,10 +131,7 @@ def parse_auto(arguments):
         email = detected_fields["email"]
         if "@" in email:
             domain = email.split("@")[1].lower()
-            # Skip common webmail domains
-            webmail = {"gmail.com", "yahoo.com", "hotmail.com", "outlook.com",
-                       "icloud.com", "aol.com", "protonmail.com", "hey.com"}
-            if domain not in webmail:
+            if domain not in WEBMAIL_DOMAINS:
                 # Extract company name from domain (e.g., "example.org" -> "Thirdprime")
                 company_name = domain.split(".")[0].title()
                 detected_fields["company"] = company_name

@@ -2,8 +2,9 @@
 # jodie/parsers/pipeline.py
 """Parser pipeline for orchestrating field extraction."""
 
-from typing import List, Dict, Optional
+from typing import List, Dict
 from .base import ParseResult
+from jodie.constants import WEBMAIL_DOMAINS
 
 
 class ParserPipeline:
@@ -103,13 +104,8 @@ class ParserPipeline:
         if "company" not in results and "email" in results:
             email = results["email"].value
             if email and "@" in email:
-                domain = email.split("@")[1]
-                # Skip common webmail domains
-                webmail = {
-                    "gmail.com", "yahoo.com", "hotmail.com", "outlook.com",
-                    "icloud.com", "aol.com", "protonmail.com", "hey.com"
-                }
-                if domain.lower() not in webmail:
+                domain = email.split("@")[1].lower()
+                if domain not in WEBMAIL_DOMAINS:
                     company = domain.split(".")[0].title()
                     results["company"] = ParseResult(
                         value=company,

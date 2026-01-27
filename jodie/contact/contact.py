@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 # jodie/contact/contact.py
 from datetime import datetime
-from typing import Optional, Set, List, Any, Union, Dict
+from typing import Optional, List, Any, Union, Dict
 import subprocess
 import objc
 from Contacts import (CNMutableContact, CNContactStore, CNSaveRequest, CNLabeledValue,
                       CNPhoneNumber, CNLabelURLAddressHomePage)
 from Foundation import NSCalendar, NSDateComponents
+
+from jodie.constants import WEBMAIL_DOMAINS
 
 
 def get_label_for_email(email: str) -> str:
@@ -20,19 +22,11 @@ def get_label_for_email(email: str) -> str:
         str: "work" if the email domain is neither a common webmail provider nor an educational institution (.edu),
              otherwise "home".
     """
-    webmail_providers: Set[str] = {
-        "gmail.com", "googlemail.com", "aol.com", "yahoo.com",
-        "hotmail.co.uk", "hotmail.com", "hotmail.de", "hotmail.es",
-        "hotmail.fr", "hotmail.it", "hushmail.com", "protonmail.com",
-        "hey.com", "icloud.com", "mac.com", "qq.com", "tuta.com",
-        "tutanota.com", "verizon.net", "ymail.com"
-    }
-
     # Extract the email's domain
-    email_domain: str = email.split('@')[-1] if email else ""
+    email_domain: str = email.split('@')[-1].lower() if email else ""
 
     # Check domain against webmail providers and education domains (.edu)
-    if email_domain not in webmail_providers and not email_domain.endswith('.edu'):
+    if email_domain not in WEBMAIL_DOMAINS and not email_domain.endswith('.edu'):
         return "work"
     else:
         return "home"

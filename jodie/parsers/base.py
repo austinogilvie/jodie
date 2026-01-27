@@ -15,6 +15,16 @@ class ParseResult:
     consumed_text: str
     source: str = "parsed"  # "parsed", "inferred", "explicit"
 
+    def __repr__(self) -> str:
+        """Developer-friendly representation showing value and confidence."""
+        conf_pct = f"{self.confidence:.0%}"
+        return f"ParseResult({self.value!r}, {conf_pct}, source={self.source!r})"
+
+    def __str__(self) -> str:
+        """User-friendly representation showing value with confidence indicator."""
+        conf_pct = f"{self.confidence:.0%}"
+        return f"{self.value} ({conf_pct})"
+
 
 class BaseParser(ABC):
     """Abstract base class for all parsers.
