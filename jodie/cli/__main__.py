@@ -7,7 +7,7 @@ import jodie
 from jodie.cli.__doc__ import __version__, __description__, __url__, __doc__
 
 COMMANDS = ('new', 'parse',)
-UTILITY_FLAGS = ('--auto', '--explicit', '--help', '--version')
+UTILITY_FLAGS = ('--auto', '--explicit', '--help', '--version', '--dry-run', '--paste', '--stdin')
 
 def detect_argument_mode(args):
     """
