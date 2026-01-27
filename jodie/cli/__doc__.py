@@ -3,9 +3,11 @@
 """jodie - Manage macOS Contacts.app from command line!
 
 Usage:
-    jodie new TEXT...
+    jodie new TEXT... [--dry-run]
     jodie new [options]
-    jodie new --auto TEXT...
+    jodie new --auto TEXT... [--dry-run]
+    jodie new --paste [--dry-run]
+    jodie new --stdin [--dry-run]
     jodie new --explicit EMAIL NAME [COMPANY] [TITLE] [NOTE...]
     jodie parse [options] TEXT
 
@@ -38,8 +40,11 @@ Options:
     -W WEBSITES --websites=WEBSITES     Comma-separated list of websites/URLs.
     --website=WEBSITES                  Website URLs (alias for --websites).
     --linkedin=URL                      LinkedIn profile URL (auto-labeled as LinkedIn).
+    -D --dry-run                        Preview parsed fields without saving.
     -H --help                           Show this screen.
     -V --version                        Show version.
+    --paste                             Read input from clipboard (pbpaste).
+    --stdin                             Read input from stdin (pipe/heredoc).
 
 """
 

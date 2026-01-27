@@ -128,6 +128,25 @@ def main():
     first, last, email, phone, title, company, websites, note = (None,) * 8
 
     args = docopt(__doc__, version=__version__)
+
+    # Handle --paste: read from clipboard
+    if args.get('--paste'):
+        from jodie.input import read_clipboard, SignaturePreprocessor
+        text = read_clipboard()
+        preprocessed = SignaturePreprocessor.preprocess(text)
+        args['TEXT'] = preprocessed
+        # Force auto mode
+        args['--auto'] = True
+
+    # Handle --stdin: read from stdin
+    if args.get('--stdin'):
+        from jodie.input import read_stdin, SignaturePreprocessor
+        text = read_stdin()
+        preprocessed = SignaturePreprocessor.preprocess(text)
+        args['TEXT'] = preprocessed
+        # Force auto mode
+        args['--auto'] = True
+
     mode = detect_argument_mode(args)
 
     if mode == "auto":
@@ -195,6 +214,23 @@ def main():
         except Exception as e:
             sys.stderr.write(f"Error processing named arguments: {str(e)}\n")
             sys.exit(1)
+
+    # Handle dry-run preview
+    if args.get('--dry-run'):
+        from jodie.cli.preview import format_preview
+        fields = {
+            'first_name': first,
+            'last_name': last,
+            'email': email,
+            'phone': phone,
+            'job_title': title,
+            'company': company,
+            'websites': websites,
+            'note': note
+        }
+        preview = format_preview(fields)
+        sys.stdout.write(preview + "\n")
+        sys.exit(0)
 
     c = jodie.contact.Contact(
         first_name=first,
