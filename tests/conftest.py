@@ -4,13 +4,13 @@ import pytest
 
 @pytest.fixture
 def sample_signatures():
-    """Real-world email signatures for testing."""
+    """Sample email signatures for testing."""
     return [
         {
             "input": "Jane Doe, Co-founder & CEO\njane@example.com • example.com",
             "expected": {
-                "first_name": "Matheus",
-                "last_name": "Riolfi",
+                "first_name": "Jane",
+                "last_name": "Doe",
                 "email": "jane@example.com",
                 "job_title": "Co-founder & CEO",
             }
@@ -18,8 +18,8 @@ def sample_signatures():
         {
             "input": "John Smith (he/him)\njohn@example.org\n555-555-5555",
             "expected": {
-                "first_name": "Keith",
-                "last_name": "Hamlin",
+                "first_name": "John",
+                "last_name": "Smith",
                 "email": "john@example.org",
                 "phone": "5555555555",
             }
