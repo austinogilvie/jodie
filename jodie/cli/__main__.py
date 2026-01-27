@@ -157,9 +157,12 @@ def main():
 
     elif mode == "named":
         try:
-            first = args.get('--first')
-            last = args.get('--last')
-            full = args.get('--full-name')
+            # Handle first name aliases: --first, --first-name, --firstname
+            first = args.get('--first') or args.get('--first-name') or args.get('--firstname')
+            # Handle last name aliases: --last, --last-name, --lastname
+            last = args.get('--last') or args.get('--last-name') or args.get('--lastname')
+            # Handle full name aliases: --full-name, --name
+            full = args.get('--full-name') or args.get('--name')
             if full:
                 parts = full.split()
                 if first is None:
@@ -170,11 +173,21 @@ def main():
             phone = args.get('--phone')
             title = args.get('--title')
             company = args.get('--company')
-            websites = args.get('--websites')
+            # Handle websites aliases: --websites, --website
+            websites = args.get('--websites') or args.get('--website')
             if websites and isinstance(websites, str):
                 # Only split if it's a string (from command line)
                 websites = [url.strip() for url in websites.split(',')]
-            note = args.get('--note')
+            # Handle --linkedin specially (adds with LinkedIn label)
+            linkedin_url = args.get('--linkedin')
+            if linkedin_url:
+                if websites is None:
+                    websites = []
+                elif isinstance(websites, str):
+                    websites = [websites]
+                websites.append({'url': linkedin_url, 'label': 'LinkedIn'})
+            # Handle note aliases: --note, --notes
+            note = args.get('--note') or args.get('--notes')
 
         except Exception as e:
             sys.stderr.write(f"Error processing named arguments: {str(e)}\n")

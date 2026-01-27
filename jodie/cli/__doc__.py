@@ -21,13 +21,21 @@ Options:
     -C COMPANY --company=COMPANY        Company name.
     -E EMAIL --email=EMAIL              Email.
     -F FIRST --first=FIRST              First name.
+    --first-name=FIRST                  First name (alias for --first).
+    --firstname=FIRST                   First name (alias for --first).
     -L LAST --last=LAST                 Last name.
+    --last-name=LAST                    Last name (alias for --last).
+    --lastname=LAST                     Last name (alias for --last).
     -U NAME --full-name=NAME            Full name.
+    --name=NAME                         Full name (alias for --full-name).
     -N NOTE --note=NOTE                 Any text you want to save in the `Note` field in Contacts.app.
+    --notes=NOTE                        Note text (alias for --note).
     -P PHONE --phone=PHONE              Phone.
     -T TITLE --title=TITLE              Job title.
-    -X TEXT  --text=TEXT                Text for jodie to try her best to parse semi-intelligently if she can.    
-    -W WEBSITES --websites=WEBSITES     Comma-separated list of websites/URLs (e.g. "https://linkedin.com/in/johndoe,https://github.com/johndoe").
+    -X TEXT  --text=TEXT                Text for jodie to try her best to parse semi-intelligently if she can.
+    -W WEBSITES --websites=WEBSITES     Comma-separated list of websites/URLs.
+    --website=WEBSITES                  Website URLs (alias for --websites).
+    --linkedin=URL                      LinkedIn profile URL (auto-labeled as LinkedIn).
     -H --help                           Show this screen.
     -V --version                        Show version.
 
