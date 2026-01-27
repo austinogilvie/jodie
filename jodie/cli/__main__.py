@@ -45,6 +45,9 @@ def parse_auto(arguments):
         "note": None
     }
 
+    # Track which arguments were consumed (by original text)
+    consumed_args = set()
+
     # First pass: identify all fields that can be unambiguously determined
     for arg in arguments:
         # 1. Email Address - Strong, unambiguous signal
@@ -52,6 +55,7 @@ def parse_auto(arguments):
             email = jodie.parsers.EmailParser.parse(arg)
             if email:
                 detected_fields["email"] = email
+                consumed_args.add(arg)
                 # Infer name from mailbox format if name is not already set
                 if not detected_fields["first_name"]:
                     first_name, last_name = jodie.parsers.NameParser.parse(arg)
@@ -66,6 +70,7 @@ def parse_auto(arguments):
             if not detected_fields["websites"]:
                 detected_fields["websites"] = []
             detected_fields["websites"].append(website)
+            consumed_args.add(arg)
             continue
 
         # 3. Job Title - Common patterns, after ruling out email/URL
@@ -73,6 +78,7 @@ def parse_auto(arguments):
             title = jodie.parsers.TitleParser.parse(arg)
             if title:
                 detected_fields["job_title"] = title
+                consumed_args.add(arg)
                 continue
 
         # 4. Phone Number - Look for phone patterns
@@ -80,6 +86,7 @@ def parse_auto(arguments):
             phone = jodie.parsers.PhoneParser.parse(arg)
             if phone:
                 detected_fields["phone"] = phone
+                consumed_args.add(arg)
                 continue
 
         # 5. Person Name - Often ambiguous without context
@@ -88,16 +95,13 @@ def parse_auto(arguments):
             if first_name or last_name:
                 detected_fields["first_name"] = first_name
                 detected_fields["last_name"] = last_name
+                consumed_args.add(arg)
                 continue
 
     # Second pass: handle company name and any remaining fields
     for arg in arguments:
-        # Skip if this argument was already used
-        if (arg == detected_fields["email"] or
-            arg in detected_fields["websites"] or
-            arg == detected_fields["job_title"] or
-            arg == detected_fields["phone"] or
-            arg == f"{detected_fields['first_name']} {detected_fields['last_name']}".strip()):
+        # Skip if this argument was already consumed
+        if arg in consumed_args:
             continue
 
         # 6. Company Name - Most ambiguous, use as fallback
@@ -120,6 +124,19 @@ def parse_auto(arguments):
             # If we get here and still don't have a company, this might be the company name
             if not detected_fields["company"]:
                 detected_fields["company"] = arg.strip()
+
+    # Infer company from email domain if not found
+    if not detected_fields["company"] and detected_fields["email"]:
+        email = detected_fields["email"]
+        if "@" in email:
+            domain = email.split("@")[1].lower()
+            # Skip common webmail domains
+            webmail = {"gmail.com", "yahoo.com", "hotmail.com", "outlook.com",
+                       "icloud.com", "aol.com", "protonmail.com", "hey.com"}
+            if domain not in webmail:
+                # Extract company name from domain (e.g., "example.org" -> "Thirdprime")
+                company_name = domain.split(".")[0].title()
+                detected_fields["company"] = company_name
 
     return detected_fields
 
