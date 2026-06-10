@@ -8,6 +8,7 @@ from jodie.parsers.parsers import (
     TitleParser,
     PhoneParser
 )
+from jodie.parsers.extractor import parse_contact_fields
 from jodie.parsers.base import ParseResult
 from jodie.parsers.pipeline import ParserPipeline
 
@@ -18,6 +19,7 @@ __all__ = (
     "WebsiteParser",
     "TitleParser",
     "PhoneParser",
+    "parse_contact_fields",
     "ParseResult",
     "ParserPipeline"
 )

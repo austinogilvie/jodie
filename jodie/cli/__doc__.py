@@ -5,25 +5,25 @@
 Usage:
     jodie new TEXT... [options]
     jodie new [options]
-    jodie new --auto TEXT... [options]
     jodie new --paste [options]
     jodie new --stdin [options]
-    jodie new --explicit EMAIL NAME [COMPANY] [TITLE] [NOTE...]
-    jodie parse [options] TEXT
+    jodie new --explicit EMAIL NAME [COMPANY] [TITLE] [options]
 
 Arguments:
-    TEXT                                Text for jodie to parse intelligently (default mode).
-    EMAIL                               Email address (used with --explicit).
-    NAME                                Full name (used with --explicit).
-    COMPANY                             Company name (used with --explicit).
-    TITLE                               Job title (used with --explicit).
-    NOTE                                Note text (used with --explicit).
+    TEXT                                Contact text to parse automatically.
+    EMAIL                               Email address for explicit positional mode.
+    NAME                                Full name for explicit positional mode.
+    COMPANY                             Company name for explicit positional mode.
+    TITLE                               Job title for explicit positional mode.
 
-Options:
-    --explicit                          Use strict positional parsing (EMAIL NAME COMPANY TITLE NOTE).
-    -A --auto                           Smart parsing mode (default, kept for backward compatibility).
-    -C COMPANY --company=COMPANY        Company name.
-    -E EMAIL --email=EMAIL              Email.
+Input Modes:
+    --paste                             Read contact text from clipboard.
+    --stdin                             Read contact text from stdin.
+    --explicit                          Use positional fields: EMAIL NAME [COMPANY] [TITLE].
+    -A --auto                           Force automatic parsing. Default for TEXT input.
+
+Contact Fields:
+    -E EMAIL --email=EMAIL              Email address.
     -F FIRST --first=FIRST              First name.
     --first-name=FIRST                  First name (alias for --first).
     --firstname=FIRST                   First name (alias for --first).
@@ -32,19 +32,19 @@ Options:
     --lastname=LAST                     Last name (alias for --last).
     -U NAME --full-name=NAME            Full name.
     --name=NAME                         Full name (alias for --full-name).
-    -N NOTE --note=NOTE                 Any text you want to save in the `Note` field in Contacts.app.
-    --notes=NOTE                        Note text (alias for --note).
-    -P PHONE --phone=PHONE              Phone.
+    -P PHONE --phone=PHONE              Phone number.
     -T TITLE --title=TITLE              Job title.
-    -X TEXT  --text=TEXT                Text for jodie to try her best to parse semi-intelligently if she can.
+    -C COMPANY --company=COMPANY        Company name.
     -W WEBSITES --websites=WEBSITES     Comma-separated list of websites/URLs.
     --website=WEBSITES                  Website URLs (alias for --websites).
     --linkedin=URL                      LinkedIn profile URL (auto-labeled as LinkedIn).
+
+Output:
     -D --dry-run                        Preview parsed fields without saving.
+
+General:
     -H --help                           Show this screen.
     -V --version                        Show version.
-    --paste                             Read input from clipboard (pbpaste).
-    --stdin                             Read input from stdin (pipe/heredoc).
 
 """
 

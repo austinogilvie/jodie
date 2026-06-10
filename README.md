@@ -48,33 +48,44 @@ Usage:
     jodie new [options]
     jodie new --paste [options]
     jodie new --stdin [options]
-    jodie new --explicit EMAIL NAME [COMPANY] [TITLE]
+    jodie new --explicit EMAIL NAME [COMPANY] [TITLE] [options]
 
 Arguments:
-    TEXT          Text for jodie to parse intelligently (default mode).
-    EMAIL         Email address (used with --explicit).
-    NAME          Full name (used with --explicit).
-    COMPANY       Company name (used with --explicit).
-    TITLE         Job title (used with --explicit).
+    TEXT                                Contact text to parse automatically.
+    EMAIL                               Email address for explicit positional mode.
+    NAME                                Full name for explicit positional mode.
+    COMPANY                             Company name for explicit positional mode.
+    TITLE                               Job title for explicit positional mode.
 
-Options:
-    --explicit                      Use strict positional parsing.
-    --paste                         Read input from clipboard (pbpaste).
-    --stdin                         Read input from stdin (pipe/heredoc).
-    -D --dry-run                    Preview parsed fields without saving.
+Input Modes:
+    --paste                             Read contact text from clipboard.
+    --stdin                             Read contact text from stdin.
+    --explicit                          Use positional fields: EMAIL NAME [COMPANY] [TITLE].
+    -A --auto                           Force automatic parsing. Default for TEXT input.
 
-    -E EMAIL --email=EMAIL          Email address.
-    -F FIRST --first=FIRST          First name.
-    -L LAST --last=LAST             Last name.
-    -U NAME --full-name=NAME        Full name (or use --name).
-    -P PHONE --phone=PHONE          Phone number.
-    -T TITLE --title=TITLE          Job title.
-    -C COMPANY --company=COMPANY    Company name.
-    -W URL --websites=URL           Comma-separated website URLs.
-    --linkedin=URL                  LinkedIn URL (auto-labeled).
+Contact Fields:
+    -E EMAIL --email=EMAIL              Email address.
+    -F FIRST --first=FIRST              First name.
+    --first-name=FIRST                  First name (alias for --first).
+    --firstname=FIRST                   First name (alias for --first).
+    -L LAST --last=LAST                 Last name.
+    --last-name=LAST                    Last name (alias for --last).
+    --lastname=LAST                     Last name (alias for --last).
+    -U NAME --full-name=NAME            Full name.
+    --name=NAME                         Full name (alias for --full-name).
+    -P PHONE --phone=PHONE              Phone number.
+    -T TITLE --title=TITLE              Job title.
+    -C COMPANY --company=COMPANY        Company name.
+    -W WEBSITES --websites=WEBSITES     Comma-separated list of websites/URLs.
+    --website=WEBSITES                  Website URLs (alias for --websites).
+    --linkedin=URL                      LinkedIn profile URL (auto-labeled as LinkedIn).
 
-    -H --help                       Show this screen.
-    -V --version                    Show version.
+Output:
+    -D --dry-run                        Preview parsed fields without saving.
+
+General:
+    -H --help                           Show this screen.
+    -V --version                        Show version.
 ```
 
 ## Examples
@@ -169,7 +180,7 @@ If you prefer explicit ordering (email first, then name, company, title):
 jodie new --explicit john@acme.com "John Doe" "Acme Inc" "CEO"
 ```
 
-Note: `--explicit` mode doesn't support `--dry-run`. Use smart parsing with `--dry-run` to preview first.
+Use `--dry-run` with explicit mode to preview before saving.
 
 ## Flag Aliases
 

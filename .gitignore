@@ -153,3 +153,4 @@ jodie-call-history.txt
 .worktrees/
 .wrangler/
 scripts/
+tmp/*

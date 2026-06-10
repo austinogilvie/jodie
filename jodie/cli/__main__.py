@@ -5,9 +5,8 @@ from docopt import docopt
 from nameparser import HumanName
 import jodie
 from jodie.cli.__doc__ import __version__, __description__, __url__, __doc__
-from jodie.constants import WEBMAIL_DOMAINS
 
-COMMANDS = ('new', 'parse',)
+COMMANDS = ('new',)
 UTILITY_FLAGS = ('--auto', '--explicit', '--help', '--version', '--dry-run', '--paste', '--stdin')
 
 def detect_argument_mode(args):
@@ -35,108 +34,7 @@ def detect_argument_mode(args):
     return "positional"
 
 def parse_auto(arguments):
-    detected_fields = {
-        "first_name": None,
-        "last_name": None,
-        "email": None,
-        "phone": None,
-        "job_title": None,
-        "company": None,
-        "websites": [],
-        "note": None
-    }
-
-    # Track which arguments were consumed (by original text)
-    consumed_args = set()
-
-    # First pass: identify all fields that can be unambiguously determined
-    for arg in arguments:
-        # 1. Email Address - Strong, unambiguous signal
-        if not detected_fields["email"]:
-            email = jodie.parsers.EmailParser.parse(arg)
-            if email:
-                detected_fields["email"] = email
-                consumed_args.add(arg)
-                # Infer name from mailbox format if name is not already set
-                if not detected_fields["first_name"]:
-                    first_name, last_name = jodie.parsers.NameParser.parse(arg)
-                    if first_name or last_name:
-                        detected_fields["first_name"] = first_name
-                        detected_fields["last_name"] = last_name
-                continue
-
-        # 2. Website URL - High-confidence markers
-        website = jodie.parsers.WebsiteParser.parse(arg)
-        if website:
-            if not detected_fields["websites"]:
-                detected_fields["websites"] = []
-            detected_fields["websites"].append(website)
-            consumed_args.add(arg)
-            continue
-
-        # 3. Job Title - Common patterns, after ruling out email/URL
-        if not detected_fields["job_title"]:
-            title = jodie.parsers.TitleParser.parse(arg)
-            if title:
-                detected_fields["job_title"] = title
-                consumed_args.add(arg)
-                continue
-
-        # 4. Phone Number - Look for phone patterns
-        if not detected_fields["phone"]:
-            phone = jodie.parsers.PhoneParser.parse(arg)
-            if phone:
-                detected_fields["phone"] = phone
-                consumed_args.add(arg)
-                continue
-
-        # 5. Person Name - Often ambiguous without context
-        if not detected_fields["first_name"]:
-            first_name, last_name = jodie.parsers.NameParser.parse(arg)
-            if first_name or last_name:
-                detected_fields["first_name"] = first_name
-                detected_fields["last_name"] = last_name
-                consumed_args.add(arg)
-                continue
-
-    # Second pass: handle company name and any remaining fields
-    for arg in arguments:
-        # Skip if this argument was already consumed
-        if arg in consumed_args:
-            continue
-
-        # 6. Company Name - Most ambiguous, use as fallback
-        if not detected_fields["company"]:
-            # Check for business-related terms
-            if any(term in arg.lower() for term in ["inc", "llc", "ltd", "corp", "co"]):
-                detected_fields["company"] = arg.strip()
-                continue
-            
-            # Check if this matches any of the collected website domains
-            if detected_fields["websites"]:
-                for url in detected_fields["websites"]:
-                    domain = url.split("//")[-1].split("/")[0].lower()
-                    if arg.lower() in domain or domain in arg.lower():
-                        detected_fields["company"] = arg.strip()
-                        break
-            if detected_fields["company"]:
-                continue
-
-            # If we get here and still don't have a company, this might be the company name
-            if not detected_fields["company"]:
-                detected_fields["company"] = arg.strip()
-
-    # Infer company from email domain if not found
-    if not detected_fields["company"] and detected_fields["email"]:
-        email = detected_fields["email"]
-        if "@" in email:
-            domain = email.split("@")[1].lower()
-            if domain not in WEBMAIL_DOMAINS:
-                # Extract company name from domain (e.g., "example.org" -> "Thirdprime")
-                company_name = domain.split(".")[0].title()
-                detected_fields["company"] = company_name
-
-    return detected_fields
+    return jodie.parsers.parse_contact_fields(arguments)
 
 
 def main():
@@ -160,9 +58,6 @@ def main():
             title = fields.get('job_title')
             company = fields.get('company')
             websites = fields.get('websites')
-        # Apply explicit overrides from command line
-        # TODO: Notes disabled pending AppleScript refactor (ISS-000012)
-        # note = args.get('--note') or args.get('--notes')
         if args.get('--company'):
             company = args.get('--company')
 
@@ -182,9 +77,6 @@ def main():
             title = fields.get('job_title')
             company = fields.get('company')
             websites = fields.get('websites')
-        # Apply explicit overrides from command line
-        # TODO: Notes disabled pending AppleScript refactor (ISS-000012)
-        # note = args.get('--note') or args.get('--notes')
         if args.get('--company'):
             company = args.get('--company')
 
@@ -205,8 +97,6 @@ def main():
                 title = fields.get('job_title')
                 company = fields.get('company')
                 websites = fields.get('websites')
-                # TODO: Notes disabled pending AppleScript refactor (ISS-000012)
-                # note = fields.get('note')
 
         elif mode == "positional":
             try:
@@ -219,8 +109,6 @@ def main():
                 sys.exit(1)
             company = args.get('COMPANY')
             title = args.get('TITLE')
-            # TODO: Notes disabled pending AppleScript refactor (ISS-000012)
-            # note = args.get('NOTE')
 
         elif mode == "named":
             try:
@@ -253,9 +141,6 @@ def main():
                     elif isinstance(websites, str):
                         websites = [websites]
                     websites.append({'url': linkedin_url, 'label': 'LinkedIn'})
-                # Handle note aliases: --note, --notes
-                # TODO: Notes disabled pending AppleScript refactor (ISS-000012)
-                # note = args.get('--note') or args.get('--notes')
 
             except Exception as e:
                 sys.stderr.write(f"Error processing named arguments: {str(e)}\n")
