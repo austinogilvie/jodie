@@ -48,7 +48,7 @@ General:
 
 """
 
-__version__     = '0.1.2'
+__version__     = '0.1.3'
 __title__       = "jodie"
 __license__     = "MIT"
 __description__ = "Jodie lets you add contacts to Contacts.app on macOS from command line"
