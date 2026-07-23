@@ -121,7 +121,25 @@ def _normalize_arguments(arguments: Any) -> List[str]:
         return []
     if isinstance(arguments, str):
         arguments = [arguments]
-    return [str(arg).strip() for arg in arguments if str(arg).strip()]
+
+    segments: List[str] = []
+    for arg in arguments:
+        # A single argument may itself contain several fields separated by
+        # newlines (e.g. a pasted block or a multi-line shell string). Treat
+        # each line as its own segment so per-field structure is preserved.
+        for line in str(arg).splitlines():
+            cleaned = _strip_wrapping_quotes(line.strip())
+            if cleaned:
+                segments.append(cleaned)
+    return segments
+
+
+def _strip_wrapping_quotes(text: str) -> str:
+    """Remove matching surrounding quote characters left by the shell/paste."""
+    text = text.strip()
+    while len(text) >= 2 and text[0] == text[-1] and text[0] in "'\"":
+        text = text[1:-1].strip()
+    return text
 
 
 def _join_segments(segments: Iterable[str]) -> str:
@@ -184,10 +202,30 @@ def _find_title_match(text: str) -> Optional[Tuple[str, str]]:
         pattern = r'(?<!\w)' + re.escape(title).replace(r'\ ', r'\s+') + r'(?!\w)'
         match = re.search(pattern, text, re.IGNORECASE)
         if match:
-            raw = match.group(0)
+            raw = _expand_compound_title(text, match)
             return TitleParser.parse(raw) or raw, raw
 
     return None
+
+
+def _expand_compound_title(text: str, match: re.Match) -> str:
+    """Grow a title match across connectors like ``&``/``and``/``/``.
+
+    Handles roles such as "CEO & Co-founder" so the whole expression is
+    treated as the title rather than leaving the other half as company text.
+    """
+    token_alt = "|".join(
+        re.escape(title).replace(r"\ ", r"\s+") for title in _title_candidates()
+    )
+    connector = r"\s*(?:&|\+|/|,|\band\b)\s*"
+    compound = re.compile(
+        rf"(?<!\w)(?:{token_alt})(?:{connector}(?:{token_alt}))+(?!\w)",
+        re.IGNORECASE,
+    )
+    for span in compound.finditer(text):
+        if span.start() <= match.start() and span.end() >= match.end():
+            return span.group(0)
+    return match.group(0)
 
 
 def _title_candidates() -> List[str]:
