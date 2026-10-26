@@ -392,55 +392,51 @@ class Contact:
         return [WebsiteLabeledValue.alloc().initWithLabel_value_(site.label(), site.value()) for site in urlAddresses]
 
     @websites.setter
-    def websites(self, value: Union[str, List[str], List[Dict[str, str]], List[CNLabeledValue]]) -> None:
+    def websites(self, value: Union[str, Dict[str, str], CNLabeledValue, List[Union[str, Dict[str, str], CNLabeledValue]]]) -> None:
         """Set websites. Can handle:
         - Single URL string
-        - List of URL strings
-        - List of dicts with 'label' and 'url' keys
-        - List of CNLabeledValue objects
+        - Single dict with 'url' and optional 'label' keys
+        - Single CNLabeledValue object
+        - A list mixing any of the above
+
+        Each item is converted independently, so a list such as
+        ``["https://example.com", {"url": "https://linkedin.com/in/x", "label": "LinkedIn"}]``
+        is safe.
         """
         if not value:
             self.contact.setUrlAddresses_([])
             return
 
-        # Convert to list of WebsiteLabeledValue objects
-        if isinstance(value, str):
-            label = get_label_for_website(value, self.email, self.company)
-            value = [WebsiteLabeledValue.alloc().initWithLabel_value_(label, value.strip().lower())]
-        elif isinstance(value, list):
-            if not value:
-                self.contact.setUrlAddresses_([])
-                return
-                
-            if isinstance(value[0], str):
-                # List of strings
-                url_values = []
-                for url in value:
-                    label = get_label_for_website(url, self.email, self.company)
-                    url_value = WebsiteLabeledValue.alloc().initWithLabel_value_(
-                        label, url.strip().lower())
-                    url_values.append(url_value)
-                value = url_values
-            elif isinstance(value[0], dict):
-                # List of dicts
-                url_values = []
-                for item in value:
-                    url = item["url"]
-                    label = item.get("label") or get_label_for_website(url, self.email, self.company)
-                    url_value = WebsiteLabeledValue.alloc().initWithLabel_value_(
-                        label, url.strip().lower())
-                    url_values.append(url_value)
-                value = url_values
-            elif isinstance(value[0], CNLabeledValue):
-                # Convert existing CNLabeledValue objects to WebsiteLabeledValue
-                url_values = []
-                for site in value:
-                    url_value = WebsiteLabeledValue.alloc().initWithLabel_value_(
-                        site.label(), site.value())
-                    url_values.append(url_value)
-                value = url_values
+        if not isinstance(value, list):
+            value = [value]
 
-        self.contact.setUrlAddresses_(value)
+        url_values = []
+        for item in value:
+            labeled = self._to_website_labeled_value(item)
+            if labeled is not None:
+                url_values.append(labeled)
+
+        self.contact.setUrlAddresses_(url_values)
+
+    def _to_website_labeled_value(self, item: Union[str, Dict[str, str], CNLabeledValue]) -> Optional[WebsiteLabeledValue]:
+        """Convert a single website item (str, dict, or CNLabeledValue) to a WebsiteLabeledValue."""
+        if item is None:
+            return None
+        if isinstance(item, str):
+            url = item.strip()
+            if not url:
+                return None
+            label = get_label_for_website(url, self.email, self.company)
+            return WebsiteLabeledValue.alloc().initWithLabel_value_(label, url.lower())
+        if isinstance(item, dict):
+            url = (item.get("url") or item.get("value") or "").strip()
+            if not url:
+                return None
+            label = item.get("label") or get_label_for_website(url, self.email, self.company)
+            return WebsiteLabeledValue.alloc().initWithLabel_value_(label, url.lower())
+        if isinstance(item, CNLabeledValue):
+            return WebsiteLabeledValue.alloc().initWithLabel_value_(item.label(), item.value())
+        raise TypeError(f"Unsupported website item type: {type(item).__name__}")
 
     def add_website(self, url: str, label: Optional[str] = None) -> None:
         """Add a single website with optional label."""

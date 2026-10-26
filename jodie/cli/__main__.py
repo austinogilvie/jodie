@@ -133,14 +133,15 @@ def main():
                 if websites and isinstance(websites, str):
                     # Only split if it's a string (from command line)
                     websites = [url.strip() for url in websites.split(',')]
-                # Handle --linkedin specially (adds with LinkedIn label)
+                # --linkedin is just another website; get_label_for_website
+                # labels any linkedin.com URL as "LinkedIn" automatically.
                 linkedin_url = args.get('--linkedin')
                 if linkedin_url:
                     if websites is None:
                         websites = []
                     elif isinstance(websites, str):
                         websites = [websites]
-                    websites.append({'url': linkedin_url, 'label': 'LinkedIn'})
+                    websites.append(linkedin_url.strip())
 
             except Exception as e:
                 sys.stderr.write(f"Error processing named arguments: {str(e)}\n")
